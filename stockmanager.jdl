@@ -1,0 +1,106 @@
+entity Plant {
+	code String required,
+    locationName String required,
+    businessUnit String,
+}
+
+entity Plan {
+	startDate ZonedDateTime,
+    endDate ZonedDateTime,
+    type String, 
+    version String
+}
+entity Workshop {
+	code String,
+    name String required
+}
+entity Line {
+	code String,
+    name String required,
+    erpId String
+}
+entity StockArea {
+	code String required,
+    name String, 
+    type StockAreaType
+}
+entity StockQuantity {
+    quantity Integer,
+    minQuantity Integer,
+    maxQuantity Integer
+}
+entity StockMovement {
+	movementQuantity Integer,
+    movementType String
+}
+
+// an ignored comment
+/** not an ignored comment */
+entity LotAssignment {
+    plannedStart ZonedDateTime,
+    plannedEnd ZonedDateTime,
+    actualStart ZonedDateTime,
+    actualEnd ZonedDateTime,
+    plannedQuantity Integer,
+    actualGoodQuantity Integer,
+    actualFailureQuantity Integer,
+    erpGoodQuantity Integer,
+    erpFailureQuantity Integer
+}
+
+entity Product {
+	partNumber String required
+    productDescription String,
+    numberPerKanban Integer,
+}
+
+enum StockAreaType {
+    WAREHOUSE, SUPERMARKET, FIFO
+}
+enum LotAssignmentType {
+    PLANNED, UNPLANNED
+}
+enum LotAssignmentStatus {
+    PLANNED, UPCOMING, WAITING, IN_PRODUCTION, PARKED, BACKLOG, CANCELLED, COMPLETED
+}
+enum LotAssignmentSubStatus {
+    PRODUCED, PARTIALLY_PRODUCED
+}
+enum LotAssignmentCreationType {
+    PLANNED, LOT_FORMATION, MANUALLY, FLOATING_RUNNER, JOKER_CARD, MES
+}
+
+relationship ManyToOne {
+    StockMovement{product} to Product
+}
+
+relationship ManyToOne {
+    StockMovement{fromStockArea} to StockArea,
+  	StockMovement{toStockArea} to StockArea
+}
+
+relationship ManyToMany {
+    StockQuantity{product} to Product,
+    StockQuantity{stockarea} to StockArea
+}
+
+relationship ManyToOne {
+	LotAssignment{product} to Product,
+    LotAssignment{line} to Line
+}
+
+relationship OneToMany {
+	Workshop{line} to Line,
+    Line{workshop} to Workshop,
+    Plant{workshops} to Workshop
+}
+
+// Set pagination options
+paginate * with pagination
+
+dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl
+// Set an angular suffix
+angularSuffix * with procon
